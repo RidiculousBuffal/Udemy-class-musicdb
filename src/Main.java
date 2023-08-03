@@ -26,14 +26,27 @@ public class Main {
         }
 
         try{
-            List<String> albumsForArtist = datasource.queryAlbumsForArtist("Iron Maiden",Datasource.ORDER_BY_DESC);
+            List<String> albumsForArtist = datasource.queryAlbumsForArtist("Pink Floyd",Datasource.ORDER_BY_DESC);
             for (String album : albumsForArtist) {
                 System.out.println(album);
             }
         }catch(NullPointerException e){
             System.out.println("opps"+e.getMessage());
         }
-
+        List<songArtist> songArtists = datasource.queryArtistsForSong("Heartless",Datasource.ORDER_BY_ASC);
+        if(songArtists==null)
+        {
+            System.out.println("Couldn't find");
+            return;
+        }
+        for(songArtist artist :songArtists)
+        {
+            System.out.println("Artist name = "
+                +artist.getArtistName()+" Album name = "
+                +artist.getAlbumName()
+                +" Track = "+artist.getTrack());
+        }
+        datasource.querySongsMetadata();
         datasource.close();
     }
 

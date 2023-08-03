@@ -36,11 +36,11 @@ public class Datasource {
     public static final int ORDER_BY_ASC=2;
     public static final int ORDER_BY_DESC=3;
 
-    public static final String QUERY_BY_ARTIST_START =
-        "SELECT "+TABLE_ALBUMS +"." +COLUMN_ALBUM_NAME + "FROM" + TABLE_ALBUMS +
+    public static final String QUERY_ALBUM_BY_ARTIST_START =
+        "SELECT "+TABLE_ALBUMS +"." +COLUMN_ALBUM_NAME + " FROM " + TABLE_ALBUMS +
             " INNER JOIN "+TABLE_ARTISTS+" ON "+TABLE_ALBUMS +"."+COLUMN_ALBUM_ARTIST +
             " = "+TABLE_ARTISTS +"."+COLUMN_ARTIST_ID+
-            " WHERE "+TABLE_ARTISTS+"."+COLUMN_ARTIST_NAME+" = ' ";
+            " WHERE "+TABLE_ARTISTS+"."+COLUMN_ARTIST_NAME+" = '";
 
     public static final String QUERY_ALBUMS_BY_ARTIST_SORT
         = " ORDER BY "+TABLE_ALBUMS+"."+COLUMN_ALBUM_NAME+" COLLATE NOCASE ";
@@ -112,36 +112,12 @@ public class Datasource {
 //        where artists.name = 'Iron Maiden'
 //        order by albums.name
 //        collate NOCASE ASC ;
-        StringBuilder sb = new StringBuilder("SELECT ");
-        sb.append(TABLE_ALBUMS);
-        sb.append('.');
-        sb.append(COLUMN_ALBUM_NAME);
-        sb.append(" FROM ");
-        sb.append(TABLE_ALBUMS);
-        sb.append(" INNER JOIN ");
-        sb.append(TABLE_ARTISTS);
-        sb.append(" ON ");
-        sb.append(TABLE_ALBUMS);
-        sb.append(".");
-        sb.append(COLUMN_ALBUM_ARTIST);
-        sb.append(" = ");
-        sb.append(TABLE_ARTISTS);
-        sb.append(".");
-        sb.append(COLUMN_ARTIST_ID);
-        sb.append(" WHERE ");
-        sb.append(TABLE_ARTISTS);
-        sb.append('.');
-        sb.append(COLUMN_ARTIST_NAME);
-        sb.append(" = '");
+        StringBuilder sb = new StringBuilder(QUERY_ALBUM_BY_ARTIST_START);
         sb.append(artistName);
         sb.append("'");
         if(sortOrder!=ORDER_BY_NONE)
         {
-            sb.append(" ORDER BY ");
-            sb.append(TABLE_ALBUMS);
-            sb.append('.');
-            sb.append(COLUMN_ALBUM_NAME);
-            sb.append(" COLLATE NOCASE ");
+            sb.append(QUERY_ALBUMS_BY_ARTIST_SORT);
             if(sortOrder==ORDER_BY_DESC)
             {
                 sb.append("DESC");

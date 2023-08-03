@@ -32,6 +32,18 @@ public class Datasource {
     public static final int INDEX_SONG_TRACK=2;
     public static final int INDEX_SONG_TITLE=3;
     public static final int INDEX_SONG_ALBUM=4;
+    public static final int ORDER_BY_NONE=1;
+    public static final int ORDER_BY_ASC=2;
+    public static final int ORDER_BY_DESC=3;
+
+    public static final String QUERY_BY_ARTIST_START =
+        "SELECT "+TABLE_ALBUMS +"." +COLUMN_ALBUM_NAME + "FROM" + TABLE_ALBUMS +
+            " INNER JOIN "+TABLE_ARTISTS+" ON "+TABLE_ALBUMS +"."+COLUMN_ALBUM_ARTIST +
+            " = "+TABLE_ARTISTS +"."+COLUMN_ARTIST_ID+
+            " WHERE "+TABLE_ARTISTS+"."+COLUMN_ARTIST_NAME+" = ' ";
+
+    public static final String QUERY_ALBUMS_BY_ARTIST_SORT
+        = " ORDER BY "+TABLE_ALBUMS+"."+COLUMN_ALBUM_NAME+" COLLATE NOCASE ";
 
     private Connection connection;
 
@@ -55,10 +67,28 @@ public class Datasource {
         }
     }
 
-    public List<Artist> queryArtists() {
+    public List<Artist> queryArtists(int sortOrder) {
+        StringBuilder sb = new StringBuilder("SELECT * FROM ");
+        sb.append(TABLE_ARTISTS);
+        if(sortOrder!=ORDER_BY_NONE)
+        {
+            sb.append(" ORDER BY ");
+            sb.append(COLUMN_ARTIST_NAME);
+            sb.append(" COLLATE NOCASE ");
+            if(sortOrder==ORDER_BY_DESC)
+            {
+                sb.append("DESC");
+            }
+            if(sortOrder==ORDER_BY_ASC)
+            {
+                sb.append("ASC");
+            }
+        }
+
+
         ResultSet results = null;
         try (Statement statement = connection.createStatement()) {
-            results = statement.executeQuery("SELECT * FROM " + TABLE_ARTISTS);
+            results = statement.executeQuery(sb.toString());
             List<Artist> artists = new ArrayList<>();
             while (results.next()) {
                 Artist artist = new Artist();
@@ -72,5 +102,68 @@ public class Datasource {
             return null;
         }
         // TODO: 2023/7/29
+    }
+    public List<String> queryAlbumsForArtist(String artistName,int sortOrder)
+    {
+//        select albums.name
+//        from albums
+//        inner join artists
+//        on albums.artist=artists._id
+//        where artists.name = 'Iron Maiden'
+//        order by albums.name
+//        collate NOCASE ASC ;
+        StringBuilder sb = new StringBuilder("SELECT ");
+        sb.append(TABLE_ALBUMS);
+        sb.append('.');
+        sb.append(COLUMN_ALBUM_NAME);
+        sb.append(" FROM ");
+        sb.append(TABLE_ALBUMS);
+        sb.append(" INNER JOIN ");
+        sb.append(TABLE_ARTISTS);
+        sb.append(" ON ");
+        sb.append(TABLE_ALBUMS);
+        sb.append(".");
+        sb.append(COLUMN_ALBUM_ARTIST);
+        sb.append(" = ");
+        sb.append(TABLE_ARTISTS);
+        sb.append(".");
+        sb.append(COLUMN_ARTIST_ID);
+        sb.append(" WHERE ");
+        sb.append(TABLE_ARTISTS);
+        sb.append('.');
+        sb.append(COLUMN_ARTIST_NAME);
+        sb.append(" = '");
+        sb.append(artistName);
+        sb.append("'");
+        if(sortOrder!=ORDER_BY_NONE)
+        {
+            sb.append(" ORDER BY ");
+            sb.append(TABLE_ALBUMS);
+            sb.append('.');
+            sb.append(COLUMN_ALBUM_NAME);
+            sb.append(" COLLATE NOCASE ");
+            if(sortOrder==ORDER_BY_DESC)
+            {
+                sb.append("DESC");
+            }
+            if(sortOrder==ORDER_BY_ASC)
+            {
+                sb.append("ASC");
+            }
+        }
+        System.out.println("SQL statement = "+sb.toString());
+        try(Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sb.toString()))
+        {
+            List<String> albums = new ArrayList<>();
+            while(resultSet.next())
+            {
+                albums.add(resultSet.getString(1));
+            }
+            return albums;
+        }catch (SQLException e){
+            System.out.println("Query failed: "+e.getMessage());
+            return null;
+        }
     }
 }
